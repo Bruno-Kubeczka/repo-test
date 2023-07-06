@@ -1,0 +1,1397 @@
+---
+title: "Rapport d'étude"
+subtitle: "Modèle linéaire généralisé et choix de modèles"
+abstract: "Cette étude a pour objet la mise en pratique de la régression logistique dans le cadre de la prédiction du fait qu'il pleuvra ou non le lendemain.\\clearpage"
+author: "EMSBD6 - Bruno KUBECZKA"
+date: "9 Juillet 2023"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 4
+    fig_height: 4
+    number_sections: yes
+    highlight: tango
+  html_notebook: 
+    toc: yes
+    toc_depth: 4
+    highlight: tango
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, cache=TRUE)
+```
+
+```{r include script, include=FALSE}
+source("projet_mlg_script.R", local = knitr::knit_global())
+```
+
+```{r chargement des librairies tableau, message=FALSE, warning=FALSE, include=FALSE}
+
+if (system.file(package='kableExtra')=="") { install.packages("kableExtra") }
+
+# Chargement des librairies (tableaux sous R)
+library(knitr)
+library(kableExtra)
+
+```
+
+
+\clearpage
+
+# Démarche de l'étude
+
+
+
+
+
+## Méthode de sélection de modèles
+
+Nous allons aborder le projet selon une **méthode de sélection de modèles de type Hold-Out**.
+
+Nous avons è disposition 2 jeu de données : 
+
+- un jeu de données **meteo.train** de **1180 observations** pour lequel la variable la varibale d'intérêt pluie.demain est donnée
+
+- un jeu de données **meteo.test** de **290 observations** pour lequel la variable la variable d'intérêt pluie.demain n'est donnée
+
+Considérons l'hypothèse que les données des 2 jeux sont issus d'un même jeu de données sur lequel un tirage aléatoire 75%/25% a été réalisé. Etant donnés les index contenus dans les jeu de données fournis, l'hypothèse est raisonnable.
+
+Nous pouvons alors aborder l'étude selon une **méthode de sélection de modèles de type Hold-Out**, à savoir:
+
+- une 1ère **phase d'entraînement et de validation** permettra d'identifier le meilleur modèle dans le cadre d'une prédiction
+
+  Pour la mise en oeuvre, le jeu **meteo.train** dont on connaît les valeurs de la variable d'intérêt **pluie.demain** va être éclaté en 2 jeux de données distincts et tirés au hasard
+
+  - Un **jeu de données d'entraînement des modèles** ; on choisit de prendre 80% des données de **meteo.train**.
+  
+  - Un **jeu de données de validation des modèles** ; on choisit de prendre 20% des données du eu train
+  
+  A l'issue de cette phase, les critères de sélection (cf. ci-dessous) permettront de conclure sur le modèle le plus à même de prédire les valeurs du jeu **meteo.test**
+
+- Une **phase de validation** basée sur le jeu de données **meteo.test** permettra de tester le "meilleur" modèle entraîné et validé.
+
+  Dans ce projet, cette phase se limitera à la prédiction des valeurs binaires ***pluie.demain***, le résultat de test faisant l'objet de l'évaluation du projet.
+
+
+## Démarche
+
+Une **Analyse exploratoire** permettra d'étudier les corrélations 
+
+- entre les covariables et la variable d'intérêt ***pluie.demain***
+  
+- entre les covariables elles-mêmes
+  
+L'analyse des covariables se fera par famille (températures, nébulosité, vents).
+  
+A partir de l'analyse, il pourra être possible d'identifier les trop fortes corrélations au sein d'une même famille, puis entre variables des différentes familles.
+  
+L'**identification des modèles candidats** adoptera plusieurs stratégies :
+
+- une **1ère stratégie** consistera à utiliser toutes les covariables d'origine sans restriction aucune (on ne considère pas les colinéarités identifiées) dans un modèle "complet"
+
+- une **2ème stratégie** consistera à sélectionner les covariables en se basant sur l'analyse exploratoire ; on s'autorise à introduire dans ce modèle des covariables transformées comme l'amplitude
+
+
+A noter que la sélection step sera appliqué sur le modèle "complet" de différente façon
+
+- **méthode descendante**
+
+- **méthode progressive depuis le modèle complet** (on retire les covariables, avec la possibilité d'en ajouter une déjà retirée précédemment)
+
+- **Méthode ascendante depuis un modèle constant** vers le modèle complet
+
+- **Méthode progressive ascendante depuis un modèle constant** : on ajoute des covariables avec la possibilité à chaque itérations d'en retirer une qui a été ajoutée précédemment)
+
+
+
+
+### Identification des modèles candidats
+
+Dans la phase 
+
+
+### Critère de sélection du "meilleur" modèle
+
+BKU : justifier le choix de AIC
+
+\newpage
+
+# Préparation des données
+
+BKU : renommage des variables
+
+BKU : Ajout de variables amplitudes 
+
+\newpage
+
+# Analyse exploratoire
+
+## 
+
+```{r}
+barplot(table(dat.meteo.train$pluie.demain), col=col_pluie.demain,
+        main="Contingence de la variable pluie.demain (meteo.train)")
+```
+
+
+## Température
+
+```{r}
+var_main="Température"
+var_mean=dat.meteo.train$temperature.mean
+var_min=dat.meteo.train$temperature.min
+var_max=dat.meteo.train$temperature.max
+```
+
+
+```{r, fig.height=6, fig.width=8}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+## Humidité relative
+
+```{r}
+var_main="Humidité"
+var_mean=dat.meteo.train$humidity.mean
+var_min=dat.meteo.train$humidity.min
+var_max=dat.meteo.train$humidity.max
+```
+
+
+```{r, fig.height=6, fig.width=8}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+
+# Corrélation entre covariables
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+## Pression
+
+```{r}
+var_main="Pression"
+var_mean=dat.meteo.train$pressure.mean
+var_min=dat.meteo.train$pressure.min
+var_max=dat.meteo.train$pressure.max
+```
+
+```{r, fig.height=6, fig.width=8}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+```{r}
+
+# Corrélation entre covariables
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+
+pluie.demain==TRUE : une légère tendance à une humidité moyenne/min/max plus grande
+pluie.demain==FALSE : une légère tendance à une humidité moyenne/min/max plus grande
+
+=> Les corrélations entre min/max/mean sont positives et relativement fortes (>0.9)
+=> Les corrélations entre min/max/meanet amplitude sont négativeset relativement faibles 
+=> La corrélation la plus faible est constatée entre amplitude et max
+
+Idées pour la modélisation 
+. Inclure un unique représentant parmi moyenne/min/max fortement corrélées : max en l'occurrence
+. inclure l'amplitude 
+. Considérer la covariable produit amplitude*max
+
+## Nébulosité totale
+
+
+```{r}
+var_main="Nébulosité totale"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$total.cloud.mean
+var_min=dat.meteo.train$total.cloud.min
+var_max=dat.meteo.train$total.cloud.max
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+
+```
+
+```{r}
+par(mfrow=c(2,2))
+# Distribution des valeurs min/max/mean
+
+hist(var_mean,
+     main=var_main)
+quantile(var_mean)
+
+hist(var_min)
+quantile(var_min) # valeurs principalement 0
+
+hist(var_max)
+quantile(var_max) # Valeurs principalement 100%
+
+hist(var_max-var_min)
+quantile(var_max-var_min) # Valeurs principalement 0 et 100%, peu de valeurs intermédiaires
+
+par(mfrow=c(1,1))
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+
+```
+
+NEBULOSITE TOTALE
+
+. mean/min/max sont relativement corrélés (50/60%)
+. amplitude est moyennement corrélé avec min/max (50/75%)
+. amplitude est peu corrélé avec mean (0.16)
+. amplitude présente les caractéristiques suivantes
+  . amplitude est "bipolarisée" : soit 0% (min et max sont les même valeurs) soit 100% (min et max sont 0/100)
+  . amplitude=100% => pluie.demain==TRUE
+  . amplitude=0% => pluie.demain==FALSE
+  
+Idées pour la modélisation 
+. inclure mean et amplitude sous forme booleenne
+. inclure le produit mean*amplitude
+
+## Nébulosité basse
+
+```{r}
+### Nébulosité basse ----
+
+var_main="Nébulosité basse"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$low.cloud.mean
+var_min=dat.meteo.train$low.cloud.min
+var_max=dat.meteo.train$low.cloud.max
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Distribution des valeurs min/max/mean
+
+hist(var_mean,
+     main=var_main)
+quantile(var_mean)
+
+hist(var_min)
+quantile(var_min) # valeurs principalement 0
+
+hist(var_max)
+quantile(var_max) # Valeurs principalement 100%
+
+hist(var_max-var_min)
+quantile(var_max-var_min) # Valeurs principalement 0 et 100%, peu de valeurs intermédiaires
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+
+```
+
+NEBULOSITE BASSE
+
+. min/max/mean sont plutôt faiblement corrélées
+. amplitude présente les caractéristiques suivantes
+  . amplitude est "bipolarisée" : soit 0% (min et max sont les même valeurs) soit 100% (min et max sont 0/100)
+  . amplitude=100% => pluie.demain==TRUE
+  . amplitude=0% => pluie.demain==FALSE
+
+ Idées pour la modélisation 
+ . inclure mean et amplitude sous forme booleenne
+ . inclure le produit min*amplitude
+ 
+ ## Nébulosité medium
+ 
+```{r}
+### Nébulosité médium ----
+
+var_main="Nébulosité médium"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$med.cloud.mean
+var_min=dat.meteo.train$med.cloud.min
+var_max=dat.meteo.train$med.cloud.max
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Distribution des valeurs min/max/mean
+
+hist(var_mean,
+     main=var_main)
+quantile(var_mean)
+
+hist(var_min)
+quantile(var_min) # valeurs principalement 0
+
+hist(var_max)
+quantile(var_max) # Valeurs principalement 100% / 50% des données sont 100%
+
+hist(var_max-var_min)
+quantile(var_max-var_min) # Valeurs principalement 0 et 100%, peu de valeurs intermédiaires
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+
+NEBULOSITE MEDIUM
+
+. mean semble lié positivement avec pluie.demain
+. max/amplitude semblent liés positivement avec pluie.demain
+   . amplitude est "bipolarisée" : soit 0% (min et max sont les même valeurs) soit 100% (min et max sont 0/100)
+   . amplitude=100% => pluie.demain==TRUE
+   . amplitude=0% => pluie.demain==FALSE
+
+Idées pour la modélisation 
+. inclure mean et amplitude sous forme booleenne
+. inclure le produit mean*amplitude
+
+
+## Nébulosité haute
+
+```{r}
+var_main="Nébulosité haute"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$high.cloud.mean
+var_min=dat.meteo.train$high.cloud.min
+var_max=dat.meteo.train$high.cloud.max
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Distribution des valeurs min/max/mean
+
+hist(var_mean,
+     main=var_main)
+quantile(var_mean)
+
+hist(var_min)
+quantile(var_min) # valeurs principalement 0
+
+hist(var_max)
+quantile(var_max) # Valeurs principalement 100% / 50% des données sont 100%
+
+hist(var_max-var_min)
+quantile(var_max-var_min) # Valeurs principalement 0 et 100%, peu de valeurs intermédiaires
+quantile(var_max[dat.meteo.train$pluie.demain]-var_min[dat.meteo.train$pluie.demain]) # Quantile quand pluie.demain=TRUE
+quantile(var_max[!dat.meteo.train$pluie.demain]-var_min[!dat.meteo.train$pluie.demain]) # Quantile quand pluie.demain=FALSE
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+
+NEBULOSITE HAUTE
+
+. mean semble lié positivement avec pluie.demain
+. max/amplitude semblent liés positivement avec pluie.demain
+   . amplitude est "bipolarisée" : soit 0% (min et max sont les même valeurs) soit 100% (min et max sont 0/100)
+   . amplitude=100% => pluie.demain==TRUE
+   . amplitude=0% => pluie.demain==FALSE
+
+Idées pour la modélisation 
+. inclure mean et amplitude sous forme booleenne
+. inclure le produit mean*amplitude
+
+## Corrélation entre nébulosité
+
+```{r}
+### Corrélation entre nébulosités ----
+
+par(mfrow=c(2,2))
+
+# corrélation entre les moyennes
+
+attach(dat.meteo.train)
+cloud.mean <- cbind(low.cloud.mean, med.cloud.mean, high.cloud.mean)
+cor(cbind(cloud.mean))
+corrplot(cor(cloud.mean), title=var_main)
+detach(dat.meteo.train)
+
+# corrélation entre les min
+
+attach(dat.meteo.train)
+cloud.min <- cbind(low.cloud.min, med.cloud.min, high.cloud.min)
+cor(cbind(cloud.min))
+corrplot(cor(cloud.min), title=var_main)
+detach(dat.meteo.train)
+
+# corrélation entre les max
+
+attach(dat.meteo.train)
+cloud.max <- cbind(low.cloud.max, med.cloud.max, high.cloud.max)
+cor(cbind(cloud.max))
+corrplot(cor(cloud.max), title=var_main)
+detach(dat.meteo.train)
+
+# corrélation entre les amplitudes (max-min)
+
+attach(dat.meteo.train)
+cloud.amplitude <- cbind(low.cloud.max-low.cloud.min, med.cloud.max-med.cloud.min, high.cloud.max-high.cloud.min)
+cor(cbind(cloud.amplitude))
+corrplot(cor(cloud.amplitude), title=var_main)
+detach(dat.meteo.train)
+
+par(mfrow=c(1,1))
+
+```
+
+
+CORRELATION entre NEBULOSITES
+
+entre nébulosités basse et haute : corrélations positives et faibles entre mean/min/max/amplitude (~0.1/0.2)
+ 
+entre nébulosités basse et moyenne : corrélations positives et relativement faibles entre mean/min/max/amplitude (~0.3/0.5)
+
+entre nébulosités moyenne et haute : corrélations positives et relativement forte entre mean/min/max/amplitude (~0.6)
+
+Idées pour la modélisation 
+. inclure le schéma des 3 nébulosités sous la forme imaginée
+. pour chaque nébulosité : 
+
+
+## Vitesse et sens du vent à 10 m (force et direction)
+
+### Vitesse du vent
+
+```{r}
+var_main="Vitesse du Vent à 10 m"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$wind.speed.mean.10
+var_min=dat.meteo.train$wind.speed.min.10
+var_max=dat.meteo.train$wind.speed.max.10
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+
+```{r}
+# VENT à 10 mètre
+#
+# => Les corrélations entre min/max/mean sont positives et relativement fortes (>0.7)
+# => Les corrélations entre min/max/mean et amplitude sont positive et relativement forte avec mean et max (>0.7)
+# => Les corrélations entre max/mean et amplitude sont positive et relativement forte  (>0.9)
+# => Les corrélations entre min et amplitude est positive et relativement faible (~0.3)
+# => La corrélation la plus faible est constatée entre amplitude et max
+#
+# Idées pour la modélisation 
+# . Inclure un unique représentant parmi moyenne/min/max fortement corrélées : min en l'occurrence
+# . inclure l'amplitude 
+# . Considérer la covariable produit amplitude*min
+#
+# Idées pour la modélisation 
+# . Amplitude et Min
+```
+
+
+### Sens du vent
+
+
+```{r}
+var_main="Sens du Vent à 10 m"
+
+# Distribution selon la variable d'intérêt
+
+var_total=dat.meteo.train$wind.dir.10
+```
+
+
+```{r}
+# histogramme des valeurs
+hist(var_total)
+hist(var_total[dat.meteo.train$pluie.demain]) # pluie.demain==TRUE
+hist(var_total[!dat.meteo.train$pluie.demain]) # pluie.demain==FALSE
+```
+
+
+```{r}
+# Distribution selon la pluie demain
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main,
+        ylab=var_main,
+        xlab="pluie.demain")
+```
+
+
+```{r}
+# Quantiles
+
+length(var_total[!dat.meteo.train$pluie.demain])
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+
+length(var_total[dat.meteo.train$pluie.demain])
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+## Vitesse et sens du vent à 80 m (force et direction)
+
+### Vitesse du vent
+
+```{r}
+var_main="Vitesse du Vent à 80 m"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$wind.speed.mean.80
+var_min=dat.meteo.train$wind.speed.min.80
+var_max=dat.meteo.train$wind.speed.max.80
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+
+```{r}
+# VENT à 80 mètres
+#
+# => Les corrélations entre min/max/mean sont positives et relativement fortes (>0.8)
+# => Les corrélations entre min/max/mean et amplitude sont positives et 
+#     . forte avec mean et max (>0.8)
+#     . relativement forte avec mean (~0.6)
+#     . relativement faible avec min (~0.6)
+#
+# Idées pour la modélisation 
+# . Inclure un unique représentant parmi moyenne/min/max fortement corrélées : min en l'occurrence
+# . inclure l'amplitude 
+# . Considérer la covariable produit amplitude*min
+#
+```
+
+
+
+### Sens du vent
+
+```{r}
+var_main="Sens du Vent à 80 m"
+
+# Distribution selon la variable d'intérêt
+
+var_total=dat.meteo.train$wind.dir.80
+```
+
+
+```{r}
+# histogramme des valeurs
+hist(var_total)
+```
+
+
+```{r}
+# Distribution selon la pluie demain
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main,
+        ylab=var_main,
+        xlab="pluie.demain")
+```
+
+
+```{r}
+# Quantiles
+
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+
+VENT à 80 mètres
+
+=> Les corrélations entre min/max/mean sont positives et relativement fortes (>0.8)
+=> Les corrélations entre min/max/mean et amplitude sont positives et 
+   . forte avec mean et max (>0.8)
+   . relativement forte avec mean (~0.6)
+   . relativement faible avec min (~0.6)
+
+Idées pour la modélisation 
+Inclure un unique représentant parmi moyenne/min/max fortement corrélées : min en l'occurrence
+. inclure l'amplitude 
+. Considérer la covariable produit amplitude*min
+
+
+## Vitesse et sens du vent à 900 m (force et direction)
+
+### Vitesse du vent
+
+
+```{r}
+var_main="Vitesse du Vent à 900 m"
+
+# Distribution selon la variable d'intérêt
+
+var_mean=dat.meteo.train$wind.speed.mean.900
+var_min=dat.meteo.train$wind.speed.min.900
+var_max=dat.meteo.train$wind.speed.max.900
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+
+VENT à 900 mètres
+
+=> Les corrélations entre min/max/mean sont positives et relativement fortes (>0.9)
+=> Les corrélations entre min/max/mean et amplitude sont positives et 
+   . forte avec max (>0.8)
+   . relativement forte avec mean (~0.6)
+   . relativement faible avec min (~0.26)
+
+Idées pour la modélisation 
+. Inclure un unique représentant parmi moyenne/min/max fortement corrélées : min en l'occurrence
+. inclure l'amplitude 
+. Considérer la covariable produit amplitude*min
+
+
+### Sens du vent
+
+
+```{r}
+var_main="Sens du Vent à 900 m"
+
+# Distribution selon la variable d'intérêt
+
+var_total=dat.meteo.train$wind.dir.900
+```
+
+
+```{r}
+# histogramme des valeurs
+hist(var_total)
+```
+
+
+```{r}
+# Distribution selon la pluie demain
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main,
+        ylab=var_main,
+        xlab="pluie.demain")
+```
+
+
+```{r}
+# Quantiles
+
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+SENS du VENT à 900 mètres
+=> on note une différence notable dans la distribution des directions du vent 
+en fontction du fait qu'il ait plu le lendemain
+
+Idées pour la modélisation 
+. inclure la direction du vent
+. combiner à la donnée vitesse du vent
+. i.e amplitude*min*dir
+
+
+## Corrélation entre vitesses et sens du vent
+
+```{r}
+# corrélation entre les moyennes
+
+var_main="vitesses moyennes 10/80/900"
+```
+
+
+```{r}
+attach(dat.meteo.train)
+speed.mean <- cbind(wind.speed.mean.10, wind.speed.mean.80, wind.speed.mean.900)
+cor(cbind(speed.mean))
+corrplot(cor(speed.mean), title=var_main)
+detach(dat.meteo.train)
+
+  # Tres forte corrélation des moyennes 10/80/900 (> 80%)
+  # on choisira une seule variable parmi 10/80/900
+```
+
+
+```{r}
+# corrélation entre les min
+
+attach(dat.meteo.train)
+speed.min <- cbind(wind.speed.min.10, wind.speed.min.80, wind.speed.min.900)
+cor(cbind(speed.min))
+corrplot(cor(speed.min), title=var_main)
+detach(dat.meteo.train)
+
+  # Tres forte corrélation des min 10/80 (> 90%)
+  # Relativement forte corrélation des min 10/900 et 80/900 (> 65%)
+  # on choisira une seule variable parmi 10/80/900
+```
+
+
+```{r}
+# corrélation entre les max
+
+attach(dat.meteo.train)
+speed.max <- cbind(wind.speed.max.10, wind.speed.max.80, wind.speed.max.900)
+cor(cbind(speed.max))
+corrplot(cor(speed.max), title=var_main)
+detach(dat.meteo.train)
+
+  # Tres forte corrélation des max 10/80 (> 90%)
+  # Relativement forte corrélation des max 10/900 et 80/900 (> 75%)
+  # on choisira une seule variable parmi 10/80/900
+```
+
+
+```{r}
+# corrélation entre les amplitudes (max-min)
+
+attach(dat.meteo.train)
+speed.amplitude <- cbind(wind.speed.amplitude.10=wind.speed.max.10-wind.speed.min.10, 
+                         wind.speed.amplitude.80=wind.speed.max.80-wind.speed.min.80, 
+                         wind.speed.amplitude.900=wind.speed.max.900-wind.speed.min.900)
+cor(cbind(speed.amplitude))
+corrplot(cor(speed.amplitude), title=var_main)
+detach(dat.meteo.train)
+
+  # Tres forte corrélation des amplitudes 10/80 (> 87%)
+  # Relativement forte corrélation des min 10/900 et 80/900 (> 60%)
+  # on choisira une seule variable parmi 10/80/900
+```
+
+
+```{r}
+# corrélation des amplitudes avec la variable d'intérêt (numérique pour l'occasion)
+
+attach(dat.meteo.train)
+wind_vs_pluiedemain <- cbind(pluie.demain, speed.amplitude)
+cor(wind_vs_pluiedemain)[,1]
+corrplot(cor(wind_vs_pluiedemain), title=var_main)
+detach(dat.meteo.train)
+```
+
+Les corrélations entre les amplitudes 10/80/900 
+et la variable d'intéret projetée sur [0,1]
+sont faibles (~25%).
+
+Le vent du jour a peu d'influence sur le risque de pluie du lendemain
+
+CORRELATION entre VENTS
+
+. Les données à 10, 80, 900 sont fortement corrélées ; on choisira un unique altitude
+
+. Les données à 900 sont celles les plus corrélées avec la variable pluie.demain projetée sur [0;1]
+
+Idée pour la modélisation
+. on ne considère que les données à 900m
+. on inclura la covariable produit amplitude*min*
+
+
+## Rafales de vent
+
+```{r}
+var_main="Rafales de vent"
+
+# Distribution selon la variable d'intéret
+
+var_mean=dat.meteo.train$wind.gust.mean
+var_min=dat.meteo.train$wind.gust.min
+var_max=dat.meteo.train$wind.gust.max
+```
+
+
+```{r}
+display_boxplot_with_pluiedemain(var_mean, var_min, var_max, dat.meteo.train$pluie.demain, var_main)
+```
+
+
+```{r}
+# Corrélation entre covariables
+
+cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min))
+corrplot(cor(cbind(var_mean, var_min, var_max, amplitude=var_max-var_min)),
+         title=var_main)
+```
+
+RAFALES de VENT
+
+=> Les corrélations entre min/max/mean sont fortes (>0.8
+=> Les corrélations entre max/mean et amplitude sont plutôt forte (>0.6)
+=> La corrélation entre min et amplitude est faible (0.15)
+
+Idées pour la modélisation 
+. Inclure un unique représentant parmi moyenne/min/max fortement corrélées : min en l'occurrence
+. inclure l'amplitude 
+. Considérer la covariable produit amplitude*min
+
+
+## Covariables simples
+
+### Précipitations
+
+```{r}
+var_main="Précipitations"
+
+var_total=dat.meteo.train$precipitation
+```
+
+
+```{r}
+# histogramme des valeurs
+
+hist(var_total)
+length(var_total[var_total==0]) / length(var_total[])
+
+  # => La majorité des valeurs est nulle : pas de pluie aujourd'hui
+```
+
+
+```{r}
+# Lien entre la variable booléenne selon la pluie demain
+
+mosaicplot( (var_total!=0) ~ dat.meteo.train$pluie.demain, 
+            col=col_pluie.demain,
+            main=var_main,
+            ylab="pluie demain",
+            xlab="Précipitations aujourd'hui (prec!=0)")
+
+  # => Quand il a plu, le risque de pluie le lendemain est plus fort
+  # => Quand il n'a pas plu, le risque de pluie le lendemain est plus faible
+```
+
+
+```{r}
+# Distribution
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main="Ensoleillement")
+```
+
+
+```{r}
+# Quantiles
+
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+=> Quand il a plu le lendemain, 75% des valeurs de précipitations sont 0
+=> Quand il n'a pas plu le lendemain, 50% des valeurs sont 0
+
+PRECIPITATION
+
+Différence dans les distributions selon pluie.demain
+
+La majorité des valeurs sont nulles
+. pluie.demain=TRUE : 50% des valeurs sont nulles
+. pluie.demain=FALSE : 75% des valeurs sont nulles
+
+Idée pour la modélisation 
+. Inclure Précipitation 
+. Inclure Précipitation sous forme booléenne
+. inclure sous la forme d'un produit précipitation*(précipitation>0.5)
+
+
+### Enneigement
+
+BKU : !!! la majeure partie des valeurs est nulle
+. Considérer une variable booléenne 
+. vérifier la corrélation entre neige==TRUT et pluie demain==TRUE
+
+```{r}
+var_main="Enneigement"
+
+var_total=dat.meteo.train$snowfall
+```
+
+```{r}
+# histogramme des valeurs d'enneigement
+
+hist(var_total)
+hist(var_total[dat.meteo.train$pluie.demain])
+hist(var_total[!dat.meteo.train$pluie.demain])
+length(var_total[var_total==0]) / length(var_total[])
+```
+
+=> 95% des valeurs sont nuls : pas de neige
+
+
+```{r}
+# Relation entre l'enneigement et la pluie demain
+
+mosaicplot( (var_total!=0) ~ dat.meteo.train$pluie.demain, 
+           col=col_pluie.demain,
+           main=var_main,
+           ylab="pluie demain",
+           xlab="Neige aujourd'hui")
+```
+
+
+=> légère différence entre le ratio de "pluie.demain" selon l'enneigement du jour.  
+Quand il a neigé, le risque de pluie est plus fort le lendemain
+quand il n'a pas neigé, 1 chance sur 2 qu'il pleuve le lendemain
+
+
+```{r}
+# Distribution
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main)
+```
+
+
+```{r}
+# Quantiles
+
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+=> Qu'il pleuve ou non le lendemain, 75% des valeurs sont nuls
+=> Quand il a neigé la veille, le risque de pluie est plus fort à mesure que les précipitations de neige sont fortes
+  
+
+NEIGE du JOUR :
+
+. Les jours sans neige représentent 50% des cas.
+. Qu'il ait plu ou non, 75% des valeurs d'enneigement sont nuls
+. Quand il a plu, et qu'il a neigé, l'enneigement a été plus fort
+
+Idée pour la modélisation 
+. Inclure Neige 
+. Inclure Neige sous forme booléenne
+. inclure sous la forme d'un produit neige*(neige>0)
+
+
+### Ensoleillement
+
+
+```{r}
+var_main="Ensoleillement"
+
+var_total=dat.meteo.train$sunshine
+```
+
+
+```{r}
+# histogramme des valeurs d'ensoleillement
+
+hist(var_total)
+length(var_total[var_total==0]) / length(var_total[])
+quantile(var_total, 0.1)
+```
+
+=> 10% des valeurs sont nuls (10% des journées sans soleil)
+
+
+
+```{r}
+# Relation entre l'enneigement et la pluie demain
+
+mosaicplot( (var_total!=0) ~ dat.meteo.train$pluie.demain, 
+            col=col_pluie.demain,
+            ylab="pluie demain",
+            xlab="Ensoleillement aujourd'hui")
+
+  # => On note une différence dans le risque de pluie selon que la journée a été ensoleillée ou non
+  # => Quand la journée n'a pas été ensoleillée (=0) : le risque de pluie est plus grand
+  # => Quand la journée n'a pas été ensoleillée (<>0) : le risque de pluie est
+```
+
+
+```{r}
+# Distribution
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main)
+```
+
+
+```{r}
+# Quantiles
+
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+ENSOLEILLEMENT :
+
+Idée pour la modélisation 
+. Inclure Ensoleillement 
+. Inclure Ensoleillement sous forme booléenne
+. inclure sous la forme d'un produit
+
+
+### Rayonnement
+
+```{r}
+var_main="Rayonnement"
+
+var_total=dat.meteo.train$radiation
+```
+
+
+```{r}
+# Distribution
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main)
+```
+
+
+```{r}
+# histogramme des valeurs d'ensoleillement
+
+hist(var_total)
+```
+
+=> 10% des valeurs sont nuls (10% des journées sans soleil)
+
+
+```{r}
+# Distribution selon pluie.demain
+
+boxplot(var_total ~ dat.meteo.train$pluie.demain, col=col_pluie.demain,
+        main=var_main,
+        xlab="pluie demain",
+        ylab=var_main)
+```
+
+
+=> Légère différence de la distribution de la radiation selon pluie.demain
+=> Un rayonnement plus faible augmente le risque de pluie
+
+
+```{r}
+# Quantiles
+
+quantile(var_total[dat.meteo.train$pluie.demain==FALSE]) # quantile des précipitations quand pluie.demain==FALSE
+quantile(var_total[dat.meteo.train$pluie.demain==TRUE]) # quantile des précipitations quand pluie.demain==TRUE
+```
+
+
+RAYONNEMENT :
+
+=> La variation de la distribution du rayonnement selon pluie.demain est minime
+
+=> pluie.demain==TRUE : une légère tendance à un rayonnement plus faible
+=> pluie.demain==FALSE : une légère tendance à un rayonnement plus fort
+
+Idées pour la modélisation 
+. inclure le rayonnement en l'état
+
+
+### Mois
+
+
+```{r}
+# Lien entre le mois et le risque de pluie
+
+mosaicplot(factor(dat.meteo.train.raw$Month) ~ dat.meteo.train$pluie.demain, 
+           col=col_pluie.demain,
+           ylab="pluie demain",
+           xlab="Mois")
+```
+
+Mois 
+
+=> Le mois de l'année a une influence sur la possibilité de pluie le lendemain
+=> Le risque de pluie est plus grand d'Avril à Septembre, de décembre à Février
+=> Le risque de pluie est plus faible en Mars, de Septembre à Novembre
+
+BKU : étonnant ! inversion TRUE / FALSE ? !!
+
+Idée pour la modélisation
+. Inclure le mois 
+
+## Colinéarité des covariables
+
+
+BKU : 
+vérifier la corrélation 
+de toutes les variables
+des variables sélectionnées
+
+
+
+```{r, fig.height=6, fig.width=8}
+
+# corrplot
+dat.meteo.train %>% 
+  select(-pluie.demain, -month) %>% 
+  cor() %>% 
+  corrplot(title = "Jeu meteo.train - Corrélation entre covariables")
+
+dat.meteo.test %>% 
+  select(-month) %>% 
+  cor() %>% 
+  corrplot(title = "Jeu meteo.test - Corrélation entre covariables")
+
+```
+
+
+\newpage
+
+# Analyse exploratoire
+
+
+## Corrélation des covariables  avec la variable d'intérêt
+
+La variable d'intérêt ***pluie.demain*** est **binaire**;
+
+Pour les **variables explicatives numériques continues**, on regarde la **distribution de la covariable** selon les modalités de la variable d'intérêt. 
+
+  boxplot(x ~ y)
+
+Pour les **variables explicatives catégorielles**, on regarde le **lien entre la covariable et la variable d'intérêt** ; en découle une **distribution  des modalités de la covariable* fonction des modalités de la variable explicative. 
+
+  mosaicplot(x ~ y)
+
+
+## Corrélation des covariables entre elles
+
+# Modélisation
+
+## Jeu d'entraînement et de validation
+
+Afin d'identifier le meilleur modèle apte à la prédiction du jeu de données **meteo.test**, on va séparer le jeu de données **meteo.train** en 2 jeu de données tiré aléatoirement.
+
+- 80% du jeu de données servira à l'ajustement des modèles : ce sera le **jeu d'entraînement**
+
+- 20% du jeu de données servira à mesurer la capacité prédictive du modèle : ce sera le **jeu de validation**.
+
+Pour déterminer les observations du jeu de données qui serviront à l'entraînement du modèle, on génère un vecteur **scp.train** de valeurs booléennes dont 80% valent ***TRUE*** et 20% valent ***FALSE***.
+
+```{r, echo=TRUE, eval=FALSE}
+
+scp.train.size <- 0.8
+
+scp.train = sample(c(TRUE, FALSE), 
+                   nrow(dat.meteo.train), replace=TRUE, 
+                   prob=c(scp.train.size, 1-scp.train.size))
+```
+
+**A noter **
+
+Pour permettre la reproductibilité de l'entraînement / validation à chaque execution du code, le vecteur est sauvegardédans un fichier **scp.train.dat**.
+S'il est présent dans le répertoire d'execution du script, le fichier est chargé et utilisé. Si le fichier n'est pas présent un nouveau tirage aléatoire est effectué.
+
+## Stratégie 1 : approche naïve
+
+L'idée de l'approche est d'appliquer une sélection "experte" des covariables.
+
+Plusieurs constats pour réduire le nombre de covariables
+
+- On peut regrouper les covariables par famille (Température, Vitesse du vent, Nébulosité,...)
+
+  Dans ces familles, il est probable que les covariables soient corrélées et qu'on peut réduire leur nombre en identifiant un représentant, et **utiliser l'amplitude**.
+  
+- On peut aussi imaginer que des familles de covariables soient corrélées entre elles et représentent une redondance de l'information
+  
+  Par ex., il est possible que les minutes d'ensoleillement ou le rayonnement solaire soit négativement corrélés à la nébulosité.
+  
+### Modèle complet
+
+```{r, echo=TRUE, eval=FALSE}
+
+s1.res.glm.0.formula <- formula("pluie.demain ~ .")
+
+s1.res.glm.0 <- glm(s1.res.glm.0.formula, 
+                       data=dat.meteo.train[scp.train,1:42],
+                       family="binomial")
+
+```
+
+```{r}
+s1.res.glm.0.formula
+```
+
+```{r}
+summary(s1.res.glm.0)
+```
+La majorité des covariables ne sont pas identifiées comme significatives.
+Néanmoins, pour cette approche naïve, aucune précaution concernant la colinéarité des covariavbles n'a été prise.
+
+Ce modèle a de fortes cchances de ne pas être très performant.
+
+Les covariables les plus significatives sont:
+
+- la **pression atmosphérique**
+
+- la **nébulosité**
+
+- la **vitesse du vent**
+
+- Le **mois** notamment **septembre** et **mars**
+
+## STEP forward
+
+Afin d'identifier les variables significatives et éliminées celles qui ne joueraient pas de rôle prépondérant (intrinséqment ou par colinéarité), on procède à une méthodologie Step Forward, 
+
+- depuis un modèle constant
+
+- vers le modèle complet
+
+```{r, echo=TRUE, eval=FALSE}
+
+# modèle constant initial
+s1.model.constant <- glm (pluie.demain~1,
+                          data=dat.meteo.train[scp.train,1:42], 
+                          family=binomial)
+
+s1.model.full <- formula(s1.res.glm.0)
+
+```
+
+```{r, echo=FALSE}
+formula(s1.model.constant)
+```
+
+```{r, echo=FALSE}
+s1.model.full
+```
+
+
+```{r}
+s1.res.step_forward$call
+```
+
+Le modèle identifié par la méthode Step Forward est le suivant
+
+```{r, echo=FALSE}
+s1.res.step_forward$formula
+```
+
+Le modèle identifié par la méthode Step Forward depuis un modèle constant présente els caractéristiques suivantes:
+
+BKU : code inline à revoir
+
+`r length(s1.res.step_forward$coefficients)` coefficients.
+
+AIC de `r s1.res.step_forward$aic`
+
+
+\scriptsize
+
+```{r}
+summary(s1.res.step_forward)
+```
+
+\normalsize
+
+
+## Stratégie 4 : approche exploratoire
+
+## Résultats
+
+\tiny
+
+```{r, echo=FALSE}
+RESULTS[,1] %>% 
+  kable("latex", booktabs = T, caption = "Résumé des modèles") %>%
+  kable_styling(font_size=4, full_width=T, latex_options = c("striped", "HOLD_position", "scale_down")) %>% 
+  pack_rows("stratégie 1", 1, 5) %>%
+  pack_rows("stratégie 4", 6, 10)
+```
+
+```{r, echo=FALSE}
+RESULTS[,-1] %>% 
+  kable("latex", booktabs = T, caption = "Résumé des scores") %>%
+  kable_styling(font_size=4, full_width=T, latex_options = c("striped", "HOLD_position", "scale_down")) %>% 
+  pack_rows("stratégie 1", 1, 5) %>%
+  pack_rows("stratégie 4", 6, 10)
+```
+
+
+\normalsize
